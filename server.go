@@ -91,10 +91,10 @@ func writeStatus() {
 	}
 }
 
-func processPlayers(deadline time.Time) {
+func processPlayers(deadline time.Time, jump bool) {
 	log.Print("reading actions")
 	for playerID := range status.Players {
-		processPlayer(playerID, deadline)
+		processPlayer(playerID, deadline, jump)
 	}
 }
 
@@ -117,7 +117,7 @@ func inputChannel(player *Player) chan string {
 	return ch
 }
 
-func processPlayer(playerID int, deadline time.Time) {
+func processPlayer(playerID int, deadline time.Time, jump bool) {
 	if player := status.Players[playerID]; player.conn != nil {
 
 		var action string
@@ -169,8 +169,7 @@ func processPlayer(playerID int, deadline time.Time) {
 			}
 		}
 
-		// TODO add jumping
-		for i := 0; i < player.Speed; i++ {
+		for i := 1; i <= player.Speed; i++ {
 			if player.Direction == "up" {
 				player.Y--
 			} else if player.Direction == "down" {
@@ -186,11 +185,13 @@ func processPlayer(playerID int, deadline time.Time) {
 				break
 			}
 
-			if status.Cells[player.Y][player.X] == 0 {
-				status.Cells[player.Y][player.X] = playerID
-			} else {
-				player.Active = false
-				break
+			if !jump || i == 1 || i == player.Speed {
+				if status.Cells[player.Y][player.X] == 0 {
+					status.Cells[player.Y][player.X] = playerID
+				} else {
+					player.Active = false
+					break
+				}
 			}
 		}
 	}
@@ -204,11 +205,12 @@ func game() {
 		status.Players[playerID].ch = inputChannel(status.Players[playerID])
 	}
 	status.Running = true
+	turn := 1
 	for status.Running {
 		timeout := time.Now().UTC().Add(time.Second * 10)
 		status.Deadline = timeout.Format(time.RFC3339)
 		writeStatus()
-		processPlayers(timeout)
+		processPlayers(timeout, turn%6 == 0)
 
 		/* receive actions */
 		numLiving := 0
@@ -223,6 +225,7 @@ func game() {
 		}
 
 		time.Sleep(time.Now().UTC().Sub(timeout))
+		turn++
 	}
 	writeStatus()
 

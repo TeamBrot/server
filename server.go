@@ -202,6 +202,15 @@ func processPlayer(playerID int, deadline time.Time, jump bool) {
 	}
 }
 
+func checkConns() bool {
+	for _, player := range status.Players {
+		if player.conn != nil {
+			return true
+		}
+	}
+	return false
+}
+
 func game() {
 	if len(status.Players) == 0 {
 		return
@@ -212,6 +221,10 @@ func game() {
 	status.Running = true
 	turn := 1
 	for status.Running {
+		if !checkConns() {
+			status.Running = false
+			break
+		}
 		timeout := time.Now().UTC().Add(time.Second * 10)
 		status.Deadline = timeout.Format(time.RFC3339)
 		writeStatus()

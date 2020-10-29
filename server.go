@@ -66,7 +66,12 @@ func addPlayer(c *websocket.Conn) {
 	playerID := len(status.Players) + 1
 	/* do not add player when a game is already running */
 	if status.Running {
+		c.Close()
 		return
+	}
+	/* the last game is over, we start a new one */
+	if !status.Running && status.You != 0 {
+		initGame()
 	}
 	status.Players[playerID] = &Player{Speed: 1, Active: true, Direction: DIRECTIONS[rand.Intn(4)], Name: strconv.Itoa(playerID), X: rand.Intn(40), Y: rand.Intn(40), conn: c}
 	status.Cells[status.Players[playerID].Y][status.Players[playerID].X] = playerID

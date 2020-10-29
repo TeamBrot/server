@@ -59,13 +59,15 @@ func speed(w http.ResponseWriter, r *http.Request) {
 }
 
 func initGame() {
-	status = Status{Width: WIDTH, Height: HEIGHT, Cells: [WIDTH][HEIGHT]int{}, Running: false, Players: make(map[int]*Player, 0)}
+	log.Println("initializing lobby")
+	status = Status{Width: WIDTH, Height: HEIGHT, Cells: [WIDTH][HEIGHT]int{}, Running: false, Players: make(map[int]*Player, 0), Deadline: "", You: 0}
 }
 
 func addPlayer(c *websocket.Conn) {
 	playerID := len(status.Players) + 1
 	/* do not add player when a game is already running */
 	if status.Running {
+		log.Println("game already in progress, disconnecting new client")
 		c.Close()
 		return
 	}
@@ -77,6 +79,7 @@ func addPlayer(c *websocket.Conn) {
 	status.Cells[status.Players[playerID].Y][status.Players[playerID].X] = playerID
 	/* start game if lobby is full now */
 	if len(status.Players) == NUMPLAYERS {
+		log.Println("starting game")
 		go game()
 	}
 }
@@ -215,14 +218,15 @@ func game() {
 	if len(status.Players) == 0 {
 		return
 	}
-	for playerID := range status.Players {
-		status.Players[playerID].ch = inputChannel(status.Players[playerID])
+	for _, player := range status.Players {
+		player.ch = inputChannel(player)
 	}
 	status.Running = true
 	turn := 1
 	for status.Running {
 		if !checkConns() {
 			status.Running = false
+			log.Println("all connections closed, stopping game")
 			break
 		}
 		timeout := time.Now().UTC().Add(time.Second * 10)
@@ -238,6 +242,7 @@ func game() {
 			}
 		}
 		if numLiving < 2 {
+			log.Println("all players but one died, stopping game")
 			status.Running = false
 			break
 		}
@@ -259,5 +264,6 @@ func game() {
 func main() {
 	initGame()
 	http.HandleFunc("/spe_ed", speed)
+	log.Println("server started")
 	log.Fatal(http.ListenAndServe("0.0.0.0:8080", nil))
 }

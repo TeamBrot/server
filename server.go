@@ -10,10 +10,6 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-const WIDTH = 40
-const HEIGHT = 40
-const NUMPLAYERS = 2
-
 var DIRECTIONS = []string{"up", "right", "left", "down"}
 
 type Player struct {
@@ -28,13 +24,13 @@ type Player struct {
 }
 
 type Status struct {
-	Width    int                `json:"width"`
-	Height   int                `json:"height"`
-	Cells    [WIDTH][HEIGHT]int `json:"cells"`
-	Players  map[int]*Player    `json:"players"`
-	You      int                `json:"you"`
-	Running  bool               `json:"running"`
-	Deadline string             `json:"deadline"`
+	Width    int             `json:"width"`
+	Height   int             `json:"height"`
+	Cells    [][]int         `json:"cells"`
+	Players  map[int]*Player `json:"players"`
+	You      int             `json:"you"`
+	Running  bool            `json:"running"`
+	Deadline string          `json:"deadline"`
 }
 
 type Input struct {
@@ -48,6 +44,7 @@ func checkOrigin(r *http.Request) bool {
 var upgrader = websocket.Upgrader{CheckOrigin: checkOrigin}
 
 var status Status
+var config Config
 
 func speed(w http.ResponseWriter, r *http.Request) {
 	c, err := upgrader.Upgrade(w, r, nil)
@@ -60,7 +57,11 @@ func speed(w http.ResponseWriter, r *http.Request) {
 
 func initGame() {
 	log.Println("initializing lobby")
-	status = Status{Width: WIDTH, Height: HEIGHT, Cells: [WIDTH][HEIGHT]int{}, Running: false, Players: make(map[int]*Player, 0), Deadline: "", You: 0}
+	cells := make([][]int, config.Height)
+	for i := range cells {
+		cells[i] = make([]int, config.Width)
+	}
+	status = Status{Width: config.Width, Height: config.Height, Cells: cells, Running: false, Players: make(map[int]*Player, 0), Deadline: "", You: 0}
 }
 
 func addPlayer(c *websocket.Conn) {
@@ -78,7 +79,7 @@ func addPlayer(c *websocket.Conn) {
 	status.Players[playerID] = &Player{Speed: 1, Active: true, Direction: DIRECTIONS[rand.Intn(4)], Name: strconv.Itoa(playerID), X: rand.Intn(40), Y: rand.Intn(40), conn: c}
 	status.Cells[status.Players[playerID].Y][status.Players[playerID].X] = playerID
 	/* start game if lobby is full now */
-	if len(status.Players) == NUMPLAYERS {
+	if len(status.Players) == config.Players {
 		log.Println("starting game")
 		go game()
 	}
@@ -188,7 +189,7 @@ func processPlayer(playerID int, deadline time.Time, jump bool) {
 				player.X--
 			}
 
-			if player.X >= WIDTH || player.Y >= HEIGHT || player.X < 0 || player.Y < 0 {
+			if player.X >= config.Width || player.Y >= config.Height || player.X < 0 || player.Y < 0 {
 				player.Active = false
 				break
 			}
@@ -229,7 +230,7 @@ func game() {
 			log.Println("all connections closed, stopping game")
 			break
 		}
-		timeout := time.Now().UTC().Add(time.Second * 10)
+		timeout := time.Now().UTC().Add(time.Second * 1000)
 		status.Deadline = timeout.Format(time.RFC3339)
 		writeStatus()
 		processPlayers(timeout, turn%6 == 0)
@@ -262,6 +263,7 @@ func game() {
 }
 
 func main() {
+	config = GetConfig()
 	initGame()
 	http.HandleFunc("/spe_ed", speed)
 	log.Println("server started")

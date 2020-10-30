@@ -237,13 +237,15 @@ func game() {
 
 		/* receive actions */
 		numLiving := 0
-		for playerID := range status.Players {
-			if status.Players[playerID].Active {
+		var lastLiving string
+		for _, player := range status.Players {
+			if player.Active {
 				numLiving++
+				lastLiving = player.Name
 			}
 		}
 		if numLiving < 2 {
-			log.Println("all players but one died, stopping game")
+			log.Println("all players but", lastLiving, "died, stopping game")
 			status.Running = false
 			break
 		}

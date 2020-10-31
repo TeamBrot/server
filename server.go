@@ -46,6 +46,7 @@ var upgrader = websocket.Upgrader{CheckOrigin: checkOrigin}
 
 var status Status
 var config Config
+var gui *Gui
 
 func speed(w http.ResponseWriter, r *http.Request) {
 	c, err := upgrader.Upgrade(w, r, nil)
@@ -99,6 +100,7 @@ func writeStatus() {
 			}
 		}
 	}
+	gui.WriteStatus(&status)
 }
 
 func processPlayers(deadline time.Time, jump bool) {
@@ -267,10 +269,26 @@ func game() {
 	}
 }
 
+func speedGui(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "gui.html")
+}
+
+func speedGuiSocket(w http.ResponseWriter, r *http.Request) {
+	g, err := HandleGuiSocket(w, r)
+	if err != nil {
+		log.Println("could not get gui socket", err)
+		return
+	}
+	gui = g
+}
+
 func main() {
 	config = GetConfig()
 	initGame()
+	gui = NewUnconnectedGui()
 	http.HandleFunc("/spe_ed", speed)
+	http.HandleFunc("/spe_ed/gui", speedGuiSocket)
 	log.Println("server started")
+	http.HandleFunc("/", speedGui)
 	log.Fatal(http.ListenAndServe("0.0.0.0:8080", nil))
 }

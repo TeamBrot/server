@@ -233,6 +233,7 @@ func game() {
 		timeout := time.Now().UTC().Add(time.Second * 1000)
 		status.Deadline = timeout.Format(time.RFC3339)
 		writeStatus()
+		log.Println("Turn: ", turn)
 		processPlayers(timeout, turn%6 == 0)
 
 		/* receive actions */

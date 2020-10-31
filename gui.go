@@ -1,7 +1,6 @@
 package main
 
 import (
-	"net/http"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -17,7 +16,7 @@ type guiMessage struct {
 	Speed time.Duration `json:"speed"`
 }
 
-func listenGuiSpeed(g *Gui) {
+func (g *Gui) listenDuration() {
 	var message guiMessage
 	for g.c != nil {
 		err := g.c.ReadJSON(&message)
@@ -28,27 +27,18 @@ func listenGuiSpeed(g *Gui) {
 	}
 }
 
-// HandleGuiSocket is a request handler that returns a GUI instance
-func HandleGuiSocket(w http.ResponseWriter, r *http.Request) (*Gui, error) {
-	c, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		return nil, err
-	}
-	g := &Gui{200 * time.Millisecond, c}
-	go listenGuiSpeed(g)
-	return g, nil
-}
-
-// NewUnconnectedGui creates a GUI instance that represents the lack thereof
-func NewUnconnectedGui() *Gui {
-	return &Gui{0, nil}
+// NewGui creates a GUI instance from the specified websocket connection and duration
+func NewGui(c *websocket.Conn, duration time.Duration) *Gui {
+	g := &Gui{duration, c}
+	go g.listenDuration()
+	return g
 }
 
 // WriteStatus writes the current game status to the GUI, pausing for a specified amount of time
-func (g *Gui) WriteStatus(status *Status) {
+func (g *Gui) WriteStatus(status *GameStatus) {
 	if g.c != nil {
 		status.You = 0
-		gui.c.WriteJSON(status)
+		g.c.WriteJSON(status)
 		time.Sleep(g.Speed)
 	}
 }

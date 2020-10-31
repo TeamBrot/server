@@ -6,6 +6,7 @@ import (
 	"strconv"
 )
 
+// Config represents parsed configuration data
 type Config struct {
 	Width   int
 	Height  int

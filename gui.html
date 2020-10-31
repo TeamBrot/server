@@ -6,7 +6,17 @@
 </head>
 
 <body>
+    <h1>spe_ed gui</h1>
     <canvas id="canvas", width="400", height="400"></canvas>
+    <h2>Duration between moves (milliseconds):</h2>
+    <div id="currentSpeed">Current speed: 200</div>
+    <button onclick="setSpeed(10)">10</button>
+    <button onclick="setSpeed(20)">20</button>
+    <button onclick="setSpeed(50)">50</button>
+    <button onclick="setSpeed(100)">100</button>
+    <button onclick="setSpeed(200)">200</button>
+    <button onclick="setSpeed(500)">500</button>
+    <button onclick="setSpeed(1000)">1000</button>
     <script type="text/javascript">
       const URL = "ws://localhost:8080/spe_ed/gui"
       const SCALING = 16;
@@ -16,8 +26,11 @@
       ctx.fillStyle = colors[0]
       let webSocket = new WebSocket("ws://localhost:8080/spe_ed/gui");
       let width, height;
+      let speed = 200;
+      const currentSpeedDiv = document.getElementById("currentSpeed");
       webSocket.onopen = function (event) {
         console.log("socket is open");
+        setSpeed(speed);
       };
       webSocket.onclose = function(event) {
         console.log("socket was closed");
@@ -36,6 +49,20 @@
         }
       }
 
+      function drawPlayer(player) {
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = "5";
+        ctx.strokeRect(player.y * SCALING, player.x * SCALING, SCALING, SCALING);
+      }
+
+      function setSpeed(s) {
+        speed = s;
+        if (webSocket.readyState === WebSocket.OPEN) {
+          webSocket.send(JSON.stringify({speed}));
+        }
+        currentSpeedDiv.innerText = "Current speed: " + speed
+      }
+
       webSocket.onmessage = function(event) {
         const status = JSON.parse(event.data);
         if (width != status.width) {
@@ -48,8 +75,10 @@
           height = status.height;
           // ctx = canvas.getContext("2d");
         }
-        console.log("message received")
         drawCells(status)
+        for (const player of Object.values(status.players)) {
+          drawPlayer(player)
+        }
       };
     </script>
 </body>

@@ -23,7 +23,7 @@ func (g *Gui) listenDuration() {
 		if err != nil {
 			g.c = nil
 		}
-		g.Speed = message.Speed
+		g.Speed = message.Speed * time.Millisecond
 	}
 }
 

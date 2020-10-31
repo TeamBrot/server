@@ -31,6 +31,7 @@ type Status struct {
 	You      int             `json:"you"`
 	Running  bool            `json:"running"`
 	Deadline string          `json:"deadline"`
+	started  bool
 }
 
 type Input struct {
@@ -61,7 +62,7 @@ func initGame() {
 	for i := range cells {
 		cells[i] = make([]int, config.Width)
 	}
-	status = Status{Width: config.Width, Height: config.Height, Cells: cells, Running: false, Players: make(map[int]*Player, 0), Deadline: "", You: 0}
+	status = Status{Width: config.Width, Height: config.Height, Cells: cells, Running: false, Players: make(map[int]*Player, 0), Deadline: "", You: 0, started: false}
 }
 
 func addPlayer(c *websocket.Conn) {
@@ -73,7 +74,7 @@ func addPlayer(c *websocket.Conn) {
 		return
 	}
 	/* the last game is over, we start a new one */
-	if !status.Running && status.You != 0 {
+	if !status.Running && status.started {
 		initGame()
 	}
 	status.Players[playerID] = &Player{Speed: 1, Active: true, Direction: DIRECTIONS[rand.Intn(4)], Name: strconv.Itoa(playerID), X: rand.Intn(40), Y: rand.Intn(40), conn: c}
@@ -222,6 +223,7 @@ func game() {
 	for _, player := range status.Players {
 		player.ch = inputChannel(player)
 	}
+	status.started = true
 	status.Running = true
 	turn := 1
 	for status.Running {

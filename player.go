@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"math/rand"
 	"time"
 
@@ -122,6 +123,7 @@ func (p *Player) ReadActionAndProcess(id int, deadline time.Time, jump bool) {
 			}
 		}
 	}
+	log.Println("Player coordinates: ", id, p.X, p.Y)
 }
 
 // NewPlayer creates a new player that starts at the specified coordinates, with the specified websocket connection and name

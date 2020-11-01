@@ -40,11 +40,10 @@
       }
 
       function drawCells(status) {
-        ctx.requestAnimationFrame
         for (let y = 0; y < status.height; y++) {
           for (let x = 0; x < status.width; x++) {
             ctx.fillStyle = colors[status.cells[y][x]];
-            ctx.fillRect(y * SCALING, x * SCALING, SCALING, SCALING);
+            ctx.fillRect(x * SCALING, y * SCALING, SCALING, SCALING);
           }
         }
       }
@@ -52,7 +51,7 @@
       function drawPlayer(player) {
         ctx.strokeStyle = "#ffffff";
         ctx.lineWidth = "5";
-        ctx.strokeRect(player.y * SCALING, player.x * SCALING, SCALING, SCALING);
+        ctx.strokeRect(player.x * SCALING, player.y * SCALING, SCALING, SCALING);
       }
 
       function setSpeed(s) {
@@ -65,6 +64,7 @@
 
       webSocket.onmessage = function(event) {
         const status = JSON.parse(event.data);
+        console.log(status)
         if (width != status.width) {
           canvas.setAttribute("width", status.width * SCALING);
           width = status.width;

@@ -44,7 +44,7 @@ func (p *Player) createInputChannel() {
 	p.ch = ch
 }
 
-// ReadActionAndProcess reads an action from the player's web socket. If no action is sent within the deadline, change_nothing will be used.
+// ReadActionAndProcess reads an action from the player's web socket. If no action is sent within the deadline, the player drops out
 func (p *Player) ReadActionAndProcess(id int, deadline time.Time, jump bool) {
 	if p.conn != nil {
 
@@ -52,7 +52,8 @@ func (p *Player) ReadActionAndProcess(id int, deadline time.Time, jump bool) {
 		select {
 		case action = <-p.ch:
 		case <-time.After(deadline.Sub(time.Now().UTC())):
-			action = "change_nothing"
+			p.Active = false
+			return
 		}
 		if action != "turn_left" && action != "turn_right" && action != "slow_down" && action != "speed_up" {
 			action = "change_nothing"

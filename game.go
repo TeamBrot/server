@@ -43,14 +43,14 @@ func (s *GameStatus) processPlayers(deadline time.Time, jump bool) {
 		player.ReadActionAndProcess(playerID, deadline, jump)
 	}
 
-	// check weither multiple players moved the same field
+	// check weither multiple players moved to the same field
 	for playerID := range processedPlayers {
 		for Y, X := range s.ocuppiedCells[playerID] {
 			for otherPlayerID := range processedPlayers {
 				for otherY, otherX := range s.ocuppiedCells[otherPlayerID] {
 					if playerID != otherPlayerID {
 						if Y == otherY && X == otherX {
-							//deactivate both Players
+							//deactivate players
 							s.Players[playerID].Active = false
 							s.Players[otherPlayerID].Active = false
 							log.Print("Player ", playerID, " and player ", otherPlayerID, " moved to the same field.")

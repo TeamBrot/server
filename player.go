@@ -98,6 +98,8 @@ func (p *Player) ReadActionAndProcess(id int, deadline time.Time, jump bool) {
 			}
 		}
 
+		occupiedCells := make(map[int]int)
+
 		for i := 1; i <= p.Speed; i++ {
 			if p.Direction == "up" {
 				p.Y--
@@ -115,6 +117,8 @@ func (p *Player) ReadActionAndProcess(id int, deadline time.Time, jump bool) {
 			}
 
 			if !jump || i == 1 || i == p.Speed {
+				occupiedCells[p.Y] = p.X
+				status.ocuppiedCells[id] = occupiedCells
 				if status.Cells[p.Y][p.X] == 0 {
 					status.Cells[p.Y][p.X] = id
 				} else {

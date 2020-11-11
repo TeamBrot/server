@@ -14,15 +14,16 @@ var DIRECTIONS = []string{"up", "right", "left", "down"}
 
 // GameStatus c
 type GameStatus struct {
-	Width    int             `json:"width"`
-	Height   int             `json:"height"`
-	Cells    [][]int         `json:"cells"`
-	Players  map[int]*Player `json:"players"`
-	You      int             `json:"you"`
-	Running  bool            `json:"running"`
-	Deadline string          `json:"deadline"`
-	gui      *Gui
-	config   *Config
+	Width         int             `json:"width"`
+	Height        int             `json:"height"`
+	Cells         [][]int         `json:"cells"`
+	Players       map[int]*Player `json:"players"`
+	You           int             `json:"you"`
+	Running       bool            `json:"running"`
+	Deadline      string          `json:"deadline"`
+	gui           *Gui
+	config        *Config
+	ocuppiedCells []map[int]int
 }
 
 func (s *GameStatus) checkPlayerConnections() bool {
@@ -36,9 +37,30 @@ func (s *GameStatus) checkPlayerConnections() bool {
 
 func (s *GameStatus) processPlayers(deadline time.Time, jump bool) {
 	log.Print("reading actions")
+	var processedPlayers []int
 	for playerID, player := range s.Players {
+		processedPlayers = append(processedPlayers, playerID)
 		player.ReadActionAndProcess(playerID, deadline, jump)
 	}
+
+	// check weither multiple players moved the same field
+	for playerID := range processedPlayers {
+		for Y, X := range s.ocuppiedCells[playerID] {
+			for otherPlayerID := range processedPlayers {
+				for otherY, otherX := range s.ocuppiedCells[otherPlayerID] {
+					if playerID != otherPlayerID {
+						if Y == otherY && X == otherX {
+							//deactivate both Players
+							s.Players[playerID].Active = false
+							s.Players[otherPlayerID].Active = false
+							log.Print("Player ", playerID, " and player ", otherPlayerID, " moved to the same field.")
+						}
+					}
+				}
+			}
+		}
+	}
+
 }
 
 func (s *GameStatus) writeStatus() {
@@ -141,5 +163,5 @@ func NewGameStatus(config *Config) *GameStatus {
 	for i := range cells {
 		cells[i] = make([]int, config.Width)
 	}
-	return &GameStatus{Width: config.Width, Height: config.Height, Cells: cells, Running: false, Players: make(map[int]*Player, 0), Deadline: "", You: 0, gui: nil, config: config}
+	return &GameStatus{Width: config.Width, Height: config.Height, Cells: cells, Running: false, Players: make(map[int]*Player, 0), Deadline: "", You: 0, gui: nil, config: config, ocuppiedCells: make([]map[int]int, config.Players+1)}
 }

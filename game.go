@@ -55,16 +55,14 @@ func (s *GameStatus) processPlayers(deadline time.Time, jump bool) {
 									//deactivate players
 									s.Players[playerID].Active = false
 									s.Players[otherPlayerID].Active = false
-									log.Print("Player ", playerID, " and player ", otherPlayerID, " moved to the same field.")
+									log.Print("Player ", playerID, " and player ", otherPlayerID, " moved both to field: ", Y, " ", X)
 								}
 							}
 						}
 					}
 				}
-				log.Println("Occupied Cells: ", s.ocuppiedCells[playerID])
+				//log.Println("Occupied Cells: ", s.ocuppiedCells[playerID])
 				cellValue := s.Cells[Y][X]
-				log.Print("Player ", playerID, " Y: ", Y, "X: ", X, " ", cellValue)
-
 				if cellValue > 0 {
 					s.Cells[Y][X] = cellValue - 10
 				} else if cellValue == -11 {

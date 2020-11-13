@@ -42,7 +42,12 @@
       function drawCells(status) {
         for (let y = 0; y < status.height; y++) {
           for (let x = 0; x < status.width; x++) {
-            ctx.fillStyle = colors[status.cells[y][x]];
+            const index = status.cells[y][x];
+            if (index < 0) {
+              ctx.fillStyle = "#000000";
+            } else {
+              ctx.fillStyle = colors[index];
+            }
             ctx.fillRect(x * SCALING, y * SCALING, SCALING, SCALING);
           }
         }

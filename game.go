@@ -23,7 +23,7 @@ type GameStatus struct {
 	Deadline      string          `json:"deadline"`
 	gui           *Gui
 	config        *Config
-	ocuppiedCells []map[int]int
+	ocuppiedCells [][]map[int]int
 }
 
 func (s *GameStatus) checkPlayerConnections() bool {
@@ -44,23 +44,35 @@ func (s *GameStatus) processPlayers(deadline time.Time, jump bool) {
 	}
 
 	// check weither multiple players moved to the same field
-	for playerID := range processedPlayers {
-		for Y, X := range s.ocuppiedCells[playerID] {
-			for otherPlayerID := range processedPlayers {
-				for otherY, otherX := range s.ocuppiedCells[otherPlayerID] {
-					if playerID != otherPlayerID {
-						if Y == otherY && X == otherX {
-							//deactivate players
-							s.Players[playerID].Active = false
-							s.Players[otherPlayerID].Active = false
-							log.Print("Player ", playerID, " and player ", otherPlayerID, " moved to the same field.")
+	for _, playerID := range processedPlayers {
+		for i := range s.ocuppiedCells[playerID] {
+			for Y, X := range s.ocuppiedCells[playerID][i] {
+				for _, otherPlayerID := range processedPlayers {
+					for j := range s.ocuppiedCells[otherPlayerID] {
+						for otherY, otherX := range s.ocuppiedCells[otherPlayerID][j] {
+							if playerID != otherPlayerID {
+								if Y == otherY && X == otherX {
+									//deactivate players
+									s.Players[playerID].Active = false
+									s.Players[otherPlayerID].Active = false
+									log.Print("Player ", playerID, " and player ", otherPlayerID, " moved to the same field.")
+								}
+							}
 						}
 					}
+				}
+				log.Println("Occupied Cells: ", s.ocuppiedCells[playerID])
+				cellValue := s.Cells[Y][X]
+				log.Print("Player ", playerID, " Y: ", Y, "X: ", X, " ", cellValue)
+
+				if cellValue > 0 {
+					s.Cells[Y][X] = cellValue - 10
+				} else if cellValue == -11 {
+					s.Cells[Y][X] = cellValue + 10
 				}
 			}
 		}
 	}
-
 }
 
 func (s *GameStatus) writeStatus() {
@@ -163,5 +175,5 @@ func NewGameStatus(config *Config) *GameStatus {
 	for i := range cells {
 		cells[i] = make([]int, config.Width)
 	}
-	return &GameStatus{Width: config.Width, Height: config.Height, Cells: cells, Running: false, Players: make(map[int]*Player, 0), Deadline: "", You: 0, gui: nil, config: config, ocuppiedCells: make([]map[int]int, config.Players+1)}
+	return &GameStatus{Width: config.Width, Height: config.Height, Cells: cells, Running: false, Players: make(map[int]*Player, 0), Deadline: "", You: 0, gui: nil, config: config, ocuppiedCells: make([][]map[int]int, config.Players+1)}
 }

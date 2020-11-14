@@ -45,7 +45,7 @@ func (p *Player) createInputChannel() {
 }
 
 // ReadActionAndProcess reads an action from the player's web socket. If no action is sent within the deadline, the player drops out
-func (p *Player) ReadActionAndProcess(id int, deadline time.Time, jump bool) {
+func (p *Player) ReadActionAndProcess(status *GameStatus, id int, deadline time.Time, jump bool) {
 	if p.conn != nil {
 
 		var action string
@@ -98,8 +98,6 @@ func (p *Player) ReadActionAndProcess(id int, deadline time.Time, jump bool) {
 			}
 		}
 
-		occupiedCells := make([]map[int]int, 0)
-
 		for i := 1; i <= p.Speed; i++ {
 			if p.Direction == "up" {
 				p.Y--
@@ -117,19 +115,13 @@ func (p *Player) ReadActionAndProcess(id int, deadline time.Time, jump bool) {
 			}
 
 			if !jump || i == 1 || i == p.Speed {
-				occupiedCell := make(map[int]int)
-				occupiedCell[p.Y] = p.X
-				occupiedCells = append(occupiedCells, occupiedCell)
-				status.ocuppiedCells[id] = occupiedCells
-				if status.Cells[p.Y][p.X] > 10 || status.Cells[p.Y][p.X] == -11 {
-					status.Cells[p.Y][p.X] = -11
-				} else if status.Cells[p.Y][p.X] == 0 {
-					status.Cells[p.Y][p.X] = id + 10
+				// If the cell is non-empty set error bit and do not write to the cell
+				if status.Cells[p.Y][p.X] != 0 {
+					status.occupiedCells[p.Y][p.X] |= 1
 				} else {
-					status.Cells[p.Y][p.X] = -1
-					p.Active = false
-					break
+					status.Cells[p.Y][p.X] = id
 				}
+				status.occupiedCells[p.Y][p.X] |= (1 << id)
 			}
 		}
 	}

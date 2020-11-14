@@ -23,7 +23,9 @@ type GameStatus struct {
 	Deadline      string          `json:"deadline"`
 	gui           *Gui
 	config        *Config
-	ocuppiedCells [][]map[int]int
+	occupiedCells [][]uint64
+	// bit 0 is the error bit which is set if there are two players on the cell
+	// bit n represents that the player with id n moved onto this field this turn
 }
 
 func (s *GameStatus) checkPlayerConnections() bool {
@@ -36,37 +38,30 @@ func (s *GameStatus) checkPlayerConnections() bool {
 }
 
 func (s *GameStatus) processPlayers(deadline time.Time, jump bool) {
+
+	for y := range s.occupiedCells {
+		for x := range s.occupiedCells[y] {
+			s.occupiedCells[y][x] = 0
+		}
+	}
+
 	log.Print("reading actions")
 	var processedPlayers []int
 	for playerID, player := range s.Players {
 		processedPlayers = append(processedPlayers, playerID)
-		player.ReadActionAndProcess(playerID, deadline, jump)
+		player.ReadActionAndProcess(s, playerID, deadline, jump)
 	}
 
-	// check weither multiple players moved to the same field
-	for _, playerID := range processedPlayers {
-		for i := range s.ocuppiedCells[playerID] {
-			for Y, X := range s.ocuppiedCells[playerID][i] {
-				for _, otherPlayerID := range processedPlayers {
-					for j := range s.ocuppiedCells[otherPlayerID] {
-						for otherY, otherX := range s.ocuppiedCells[otherPlayerID][j] {
-							if playerID != otherPlayerID {
-								if Y == otherY && X == otherX {
-									//deactivate players
-									s.Players[playerID].Active = false
-									s.Players[otherPlayerID].Active = false
-									log.Print("Player ", playerID, " and player ", otherPlayerID, " moved both to field: ", Y, " ", X)
-								}
-							}
-						}
+	for y := range s.occupiedCells {
+		for x := range s.occupiedCells[y] {
+			if s.occupiedCells[y][x] != 0 {
+				for _, playerID := range processedPlayers {
+					// If the error bit is set and the (playerID)th bit as well, kill player and set cell to -1
+					if s.occupiedCells[y][x]&1 != 0 && s.occupiedCells[y][x]&(1<<playerID) != 0 {
+						log.Print("Player ", playerID, " moved to field: ", y, " ", x)
+						s.Cells[y][x] = -1
+						s.Players[playerID].Active = false
 					}
-				}
-				//log.Println("Occupied Cells: ", s.ocuppiedCells[playerID])
-				cellValue := s.Cells[Y][X]
-				if cellValue > 0 {
-					s.Cells[Y][X] = cellValue - 10
-				} else if cellValue == -11 {
-					s.Cells[Y][X] = cellValue + 10
 				}
 			}
 		}
@@ -173,5 +168,20 @@ func NewGameStatus(config *Config) *GameStatus {
 	for i := range cells {
 		cells[i] = make([]int, config.Width)
 	}
-	return &GameStatus{Width: config.Width, Height: config.Height, Cells: cells, Running: false, Players: make(map[int]*Player, 0), Deadline: "", You: 0, gui: nil, config: config, ocuppiedCells: make([][]map[int]int, config.Players+1)}
+	occupiedCells := make([][]uint64, config.Height)
+	for i := range occupiedCells {
+		occupiedCells[i] = make([]uint64, config.Height)
+	}
+	return &GameStatus{
+		Width:         config.Width,
+		Height:        config.Height,
+		Cells:         cells,
+		Running:       false,
+		Players:       make(map[int]*Player, 0),
+		Deadline:      "",
+		You:           0,
+		gui:           nil,
+		config:        config,
+		occupiedCells: occupiedCells,
+	}
 }

@@ -52,6 +52,10 @@ func GetConfig() Config {
 		case "-p":
 			i++
 			config.Players = parseInt(os.Args[i], 2)
+			// We use a bitmask with the players' id, so the maximum id is 63
+			if config.Players > 63 {
+				printUsageAndExit(1)
+			}
 			break
 		case "--help":
 			printUsageAndExit(0)

@@ -170,7 +170,7 @@ func NewGameStatus(config *Config) *GameStatus {
 	}
 	occupiedCells := make([][]uint64, config.Height)
 	for i := range occupiedCells {
-		occupiedCells[i] = make([]uint64, config.Height)
+		occupiedCells[i] = make([]uint64, config.Width)
 	}
 	return &GameStatus{
 		Width:         config.Width,

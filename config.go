@@ -18,7 +18,7 @@ func printUsageAndExit(status int) {
 Host a server for spe_ed 
 
   -h 	height of the board
-  -p 	number of players
+  -p 	number of players (max: 63)
   -w	width of the board 
 `, os.Args[0])
 	os.Exit(status)

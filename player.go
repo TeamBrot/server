@@ -29,17 +29,16 @@ func (p *Player) createInputChannel() {
 	ch := make(chan string)
 	go func() {
 		input := Input{}
-		for {
-			if p.conn != nil {
-				err := p.conn.ReadJSON(&input)
-				if err != nil {
-					p.conn = nil
-				}
-				ch <- input.Action
+		for p.conn != nil {
+			err := p.conn.ReadJSON(&input)
+			if err != nil {
+				p.conn = nil
 			} else {
-				ch <- "change_nothing"
+				ch <- input.Action
 			}
 		}
+		log.Println("player", p.Name, "disconnected")
+		p.Active = false
 	}()
 	p.ch = ch
 }

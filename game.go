@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"strconv"
 	"time"
+	"sync"
 
 	"github.com/gorilla/websocket"
 )
@@ -21,6 +22,7 @@ type GameStatus struct {
 	You           int             `json:"you"`
 	Running       bool            `json:"running"`
 	Deadline      string          `json:"deadline"`
+	mutex         *sync.Mutex
 	gui           *Gui
 	config        *Config
 	occupiedCells [][]uint64
@@ -106,6 +108,7 @@ func (s *GameStatus) getNumLiving() (int, string) {
 
 // AddPlayer adds a player to the current GameStatus. It closes the connection if the game is already running
 func (s *GameStatus) AddPlayer(c *websocket.Conn, config *Config) {
+	s.mutex.Lock()
 	playerID := len(s.Players) + 1
 	/* do not add player when a game is already running */
 	if s.Running {
@@ -115,6 +118,7 @@ func (s *GameStatus) AddPlayer(c *websocket.Conn, config *Config) {
 	}
 	s.Players[playerID] = NewPlayer(rand.Intn(s.config.Width), rand.Intn(s.config.Height), c, strconv.Itoa(playerID))
 	s.Cells[s.Players[playerID].Y][s.Players[playerID].X] = playerID
+	s.mutex.Unlock()
 }
 
 // GetNumPlayers returns the amount of players inside the game
@@ -183,5 +187,6 @@ func NewGameStatus(config *Config) *GameStatus {
 		gui:           nil,
 		config:        config,
 		occupiedCells: occupiedCells,
+		mutex:         &sync.Mutex{},
 	}
 }

@@ -4,8 +4,8 @@ import (
 	"log"
 	"math/rand"
 	"strconv"
-	"time"
 	"sync"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -140,7 +140,7 @@ func (s *GameStatus) GameLoop() {
 			log.Println("all connections closed, stopping game")
 			break
 		}
-		timeout := time.Now().UTC().Add(time.Second * 1000)
+		timeout := time.Now().UTC().Add(time.Duration(1000000000 * (rand.Intn(5) + 5)))
 		s.Deadline = timeout.Format(time.RFC3339)
 		s.writeStatus()
 		s.processPlayers(timeout, turn%6 == 0)

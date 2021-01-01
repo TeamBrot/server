@@ -15,7 +15,7 @@ const hostname = "0.0.0.0"
 const port = 8080
 
 //Define the urls where to find the service
-const timeURL = "/sped_ed_time"
+const timeURL = "/spe_ed_time"
 const wsURL = "/spe_ed"
 const guiSocket = "/spe_ed/gui"
 const guiURL = "/"

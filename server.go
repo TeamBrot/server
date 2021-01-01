@@ -2,12 +2,23 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/gorilla/websocket"
 )
+
+//Define address and port to listen on const
+const hostname = "0.0.0.0"
+const port = 8080
+
+//Define the urls where to find the service
+const timeURL = "/sped_ed_time"
+const wsURL = "/spe_ed"
+const guiSocket = "/spe_ed/gui"
+const guiURL = "/"
 
 type ServerTime struct {
 	Time         string `json:"time"`
@@ -63,10 +74,11 @@ func main() {
 	config = GetConfig()
 	status = NewGameStatus(&config)
 
-	http.HandleFunc("/spe_ed_time", speedTime)
-	http.HandleFunc("/spe_ed", speed)
-	http.HandleFunc("/spe_ed/gui", speedGuiSocket)
-	http.HandleFunc("/", speedGui)
+	http.HandleFunc(timeURL, speedTime)
+	http.HandleFunc(wsURL, speed)
+	http.HandleFunc(guiSocket, speedGuiSocket)
+	http.HandleFunc(guiURL, speedGui)
 	log.Println("server started")
-	log.Fatal(http.ListenAndServe("0.0.0.0:8080", nil))
+	serverHostname := fmt.Sprintf("%s:%d", hostname, port)
+	log.Fatal(http.ListenAndServe(serverHostname, nil))
 }

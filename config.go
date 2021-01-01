@@ -6,6 +6,11 @@ import (
 	"strconv"
 )
 
+//Define default Parameters for server
+const defaultWidth = 40
+const defaultHeight = 40
+const defaultNumOfPlayers = 2
+
 // Config represents parsed configuration data
 type Config struct {
 	Width   int
@@ -37,7 +42,7 @@ func parseInt(arg string, minValue int) int {
 
 // GetConfig parses the program arguments and returns the configuration
 func GetConfig() Config {
-	config := Config{40, 40, 2}
+	config := Config{defaultWidth, defaultHeight, defaultNumOfPlayers}
 
 	for i := 1; i < len(os.Args); i++ {
 		switch os.Args[i] {

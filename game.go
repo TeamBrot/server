@@ -10,6 +10,9 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+var minDeadline int
+var deadlineOffset int
+
 // DIRECTIONS contains all possible directions
 var DIRECTIONS = []string{"up", "right", "left", "down"}
 
@@ -140,7 +143,7 @@ func (s *GameStatus) GameLoop() {
 			log.Println("all connections closed, stopping game")
 			break
 		}
-		timeout := time.Now().UTC().Add(time.Duration(1000000000 * (rand.Intn(5) + 5)))
+		timeout := time.Now().UTC().Add(time.Duration(1000000000 * (rand.Intn(deadlineOffset) + minDeadline)))
 		s.Deadline = timeout.Format(time.RFC3339)
 		s.writeStatus()
 		s.processPlayers(timeout, turn%6 == 0)

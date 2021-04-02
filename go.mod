@@ -1,4 +1,4 @@
-module gitlab.hpi.de/spe_ed-brot/server
+module github.com/TeamBrot/server
 
 go 1.16
 

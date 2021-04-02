@@ -4,6 +4,8 @@
 
 ![Brot banner](brot-icup.jpg)
 
+## Description
+
 This project contains a server program to emulate the official test environment found unter `wss://msoll.de/spe_ed`. It provides the standard WebSocket game API (`/spe_ed`) as well as the time API (`/spe_ed_time`). It creates a web server that hosts a GUI visualizing the game. The GUI can be accessed under `http://localhost:8081`. 
 
 The server supports one game at a time. It does not check the client's responses for timeouts. Therefore, it should only be used in development.

@@ -1,8 +1,12 @@
-# brot-server
+# Brot-Server
 
-<img align="center" src="brot.jpg" width="400px">
+![](https://github.com/TeamBrot/server/actions/workflows/go.yml/badge.svg)
 
-This project contains a server program to emulate the official test environment found unter `wss://msoll.de/spe_ed`.
+![Brot banner](brot-icup.jpg)
+
+This project contains a server program to emulate the official test environment found unter `wss://msoll.de/spe_ed`. It provides the standard WebSocket game API (`/spe_ed`) as well as the time API (`/spe_ed_time`). It creates a web server that hosts a GUI visualizing the game. The GUI can be accessed under `http://localhost:8081`. 
+
+The server supports one game at a time. It does not check the client's responses for timeouts. Therefore, it should only be used in development.
 
 ## Installation
 This program uses the gorilla/websocket library that can be found under [https://github.com/gorilla/websocket](https://github.com/gorilla/websocket).
@@ -10,7 +14,17 @@ This program uses the gorilla/websocket library that can be found under [https:/
 To install the library, run `go get github.com/gorilla/websocket`. 
 
 ## Running the server
-To build the server, run `go build .`
+To build the server, run `go build`
 
 To run the server, run `./server`
+
+## Configuration
+
+The server has several configuration options:
+
+- `-h height`: Board height
+- `-w width`: Board width
+- `-p player`: Number of players (Up to 63)
+- `-d minimalDeadline`: Minimal deadline in seconds
+- `-o deadlineOffset`: Maximum deadline offset in seconds; maximum deadline is `minimalDeadline + deadlineOffset`. The deadline will be chosen at random.
 

@@ -11,14 +11,26 @@ This project contains a server program to emulate the official test environment 
 The server supports one game at a time. It does not check the client's responses for timeouts. Therefore, it should only be used in development.
 
 ## Installation
-This program uses the gorilla/websocket library that can be found under [https://github.com/gorilla/websocket](https://github.com/gorilla/websocket).
 
-To install the library, run `go get github.com/gorilla/websocket`. 
+### 0. Prerequisites
 
-## Running the server
-To build the server, run `go build`
+Our software is written in go. So you need a fully functional go installation. Information about how to set thi up you find ![here](https://golang.org/doc/install)
 
-To run the server, run `./server`
+This program also uses the gorilla/websocket library that can be found under [https://github.com/gorilla/websocket](https://github.com/gorilla/websocket).
+
+To install the library, run `go get github.com/gorilla/websocket` after you installed go. 
+
+### 1. Cloning the repository
+
+To clone the repository run `git clone https://github.com/TeamBrot/server.git`. If you'd like to use the scripts we provide with our client. Make sure to clone the repository to the same directory, you cloned the client. To get into the repository run `cd server`
+
+### 2. Building the server
+
+Run `go build` at the root level of the repository. If this step fails, make sure you are at the right directory and your go installation works.
+
+### 3. Running the server
+
+Run `./server`. The server is now waiting for connections. After the specified number of players connected, a game starts. You can stop the server by pressing <kbd>Strg</kbd>+<kbd>c</kbd> on your keyboard. For information about the options read the Section Configuration
 
 ## Configuration
 

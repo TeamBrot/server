@@ -5,7 +5,7 @@
 ![Go Version](https://img.shields.io/github/go-mod/go-version/TeamBrot/client)
 ![License](https://img.shields.io/github/license/TeamBrot/client)
 
-![Brot banner](brot-icup.jpg)
+[![](brot-icup.jpg)](https://teambrot.github.io/)
 
 ## Description
 

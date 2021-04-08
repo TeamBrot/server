@@ -1,6 +1,9 @@
 # Brot-Server
 
 ![](https://github.com/TeamBrot/server/actions/workflows/go.yml/badge.svg)
+![LOC](https://img.shields.io/tokei/lines/github/TeamBrot/client)
+![Go Version](https://img.shields.io/github/go-mod/go-version/TeamBrot/client)
+![License](https://img.shields.io/github/license/TeamBrot/client)
 
 ![Brot banner](brot-icup.jpg)
 

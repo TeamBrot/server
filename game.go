@@ -112,6 +112,7 @@ func (s *GameStatus) getNumLiving() (int, string) {
 // AddPlayer adds a player to the current GameStatus. It closes the connection if the game is already running
 func (s *GameStatus) AddPlayer(c *websocket.Conn, config *Config) {
 	s.mutex.Lock()
+	defer s.mutex.Unlock()
 	playerID := len(s.Players) + 1
 	/* do not add player when a game is already running */
 	if s.Running {
@@ -121,7 +122,6 @@ func (s *GameStatus) AddPlayer(c *websocket.Conn, config *Config) {
 	}
 	s.Players[playerID] = NewPlayer(rand.Intn(s.config.Width), rand.Intn(s.config.Height), c, strconv.Itoa(playerID))
 	s.Cells[s.Players[playerID].Y][s.Players[playerID].X] = playerID
-	s.mutex.Unlock()
 }
 
 // GetNumPlayers returns the amount of players inside the game

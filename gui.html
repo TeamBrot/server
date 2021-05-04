@@ -7,6 +7,14 @@
 
 <body>
     <h1>brot-gui</h1>
+    <div id="players">
+        <div id="1__player" style="display: none; margin-bottom: 5px"><font id="1__color">███ </font><span id="1__name"></span></div>
+        <div id="2__player" style="display: none; margin-bottom: 5px"><font id="2__color">███ </font><span id="2__name"></span></div>
+        <div id="3__player" style="display: none; margin-bottom: 5px"><font id="3__color">███ </font><span id="3__name"></span></div>
+        <div id="4__player" style="display: none; margin-bottom: 5px"><font id="4__color">███ </font><span id="4__name"></span></div>
+        <div id="5__player" style="display: none; margin-bottom: 5px"><font id="5__color">███ </font><span id="5__name"></span></div>
+        <div id="6__player" style="display: none; margin-bottom: 5px"><font id="6__color">███ </font><span id="6__name"></span></div>
+    </div>
     <canvas id="canvas", width="400", height="400"></canvas>
     <h2>Duration between moves (milliseconds):</h2>
     <div id="currentSpeed">Current speed: 200</div>
@@ -53,6 +61,17 @@
         }
       }
 
+      function displayPlayers(status) {
+        for (const player of Object.keys(status.players)) {
+          const playerDiv = document.getElementById(player + '__player');
+          playerDiv.style.display = 'block';
+          const colorFont = document.getElementById(player + '__color');
+          colorFont.style.color = colors[player];
+          const nameSpan = document.getElementById(player + '__name');
+          nameSpan.innerText = status.players[player].name;
+        }
+      }
+
       function drawPlayer(player) {
         ctx.strokeStyle = "#ffffff";
         ctx.lineWidth = "5";
@@ -84,6 +103,7 @@
         for (const player of Object.values(status.players)) {
           drawPlayer(player)
         }
+        displayPlayers(status);
       };
     </script>
 </body>

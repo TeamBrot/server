@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"math/rand"
-	"strconv"
 	"sync"
 	"time"
 
@@ -110,7 +109,7 @@ func (s *GameStatus) getNumLiving() (int, string) {
 }
 
 // AddPlayer adds a player to the current GameStatus. It closes the connection if the game is already running
-func (s *GameStatus) AddPlayer(c *websocket.Conn, config *Config) {
+func (s *GameStatus) AddPlayer(c *websocket.Conn, config *Config, name string) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	playerID := len(s.Players) + 1
@@ -120,7 +119,7 @@ func (s *GameStatus) AddPlayer(c *websocket.Conn, config *Config) {
 		c.Close()
 		return
 	}
-	s.Players[playerID] = NewPlayer(rand.Intn(s.config.Width), rand.Intn(s.config.Height), c, strconv.Itoa(playerID))
+	s.Players[playerID] = NewPlayer(rand.Intn(s.config.Width), rand.Intn(s.config.Height), c, name)
 	s.Cells[s.Players[playerID].Y][s.Players[playerID].X] = playerID
 }
 

@@ -36,7 +36,8 @@ func speed(w http.ResponseWriter, r *http.Request) {
 		log.Print("upgrade:", err)
 		return
 	}
-	status.AddPlayer(c, &config)
+	key := r.URL.Query().Get("key")
+	status.AddPlayer(c, &config, key)
 
 	/* start game if lobby is full now */
 	if status.GetNumPlayers() == config.Players {
